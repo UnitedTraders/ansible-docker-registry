@@ -1,13 +1,15 @@
 ---
+- name: install docker
+  include: install.yml
 
-  - name: Check docker version
-    shell: docker --version
-    register: docker_version
+- name: Check docker version
+  shell: docker --version
+  register: docker_version
 
-  - name: Install Docker Registry v2 for Debian or RedHat
-    include: docker-registry-v2.yml
-    when: docker_version.stdout|group('Docker\sversion\s(\d\.\d\.\d),\sbuild\s(\w*)', 1)|version_compare(1.6, '>=')
+- name: Install Docker Registry v2 for Debian or RedHat
+  include: docker-registry-v2.yml
+  when: docker_version.stdout|group('Docker\sversion\s(\d\.\d\.\d),\sbuild\s(\w*)', 1)|version_compare(1.6, '>=')
 
-  - name: Install Docker Registry v1 for Debian or RedHat
-    include: docker-registry-v1.yml
-    when: docker_version.stdout|group('Docker\sversion\s(\d\.\d\.\d),\sbuild\s(\w*)', 1)|version_compare(1.6, '<')
+- name: Install Docker Registry v1 for Debian or RedHat
+  include: docker-registry-v1.yml
+  when: docker_version.stdout|group('Docker\sversion\s(\d\.\d\.\d),\sbuild\s(\w*)', 1)|version_compare(1.6, '<')

@@ -9,9 +9,13 @@ pip_extra_args: ""
 proxy_env: {}
 
 docker_registry_host: "{{ansible_fqdn}}"
-docker_registry_ip: "{{hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address']}}"
+docker_registry_ip: "{{hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address']}}"
 docker_registry_with_ssl: yes
+docker_registry_ssl_self_signed: yes
 docker_registry_port: 443
+
+ssl_certificate_cert: 'files/default.crt'
+ssl_certificate_key_content: 'TEST'
 
 docker_registry_users:
   - name: docker

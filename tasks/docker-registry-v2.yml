@@ -32,6 +32,12 @@
       mode: 750
     when: not docker_registry_storage.stat.exists #may already exist as a symbolic link
 
+  - name: create config directory
+    file: path="/etc/docker/registry" state="directory"
+
+  - name: copy config
+    template: src="config.yml.j2" dest="/etc/docker/registry/config.yml"
+
   - name: ensure Docker Registry is running
     docker:
       image: "registry:2"
@@ -43,6 +49,7 @@
         REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /registry
       volumes:
         - /var/lib/docker-registry:/registry:rw
+        - /etc/docker/registry/config.yml:/etc/docker/registry/config.yml
       privileged: yes
       state: reloaded
       pull: missing
@@ -59,71 +66,5 @@
 #    retries: 5
 #    delay: 2
 
-# Secure docker registry
-  - name: Secure Docker Registry with Nginx for Debian
-    apt:
-      name: "{{item}}"
-      state: latest
-    with_items:
-      - openssl
-    when: ansible_os_family == "Debian"
+  - include: nginx.yml
 
-  - name: Secure Docker Registry with Nginx for Redhat
-    yum:
-      name: "{{item}}"
-      state: latest
-    with_items:
-      - openssl
-    when: ansible_os_family == "RedHat"
-
-  - name: Install latest passlib with pip
-    pip:
-      name: passlib
-      state: latest
-      extra_args: "{{ pip_extra_args }}"
-
-  - file: path=/etc/nginx/certs state=directory
-    when: docker_registry_with_ssl|bool
-
-  - name: stat docker-registry certificate file
-    stat: path=/etc/nginx/certs/{{docker_registry_host}}.crt
-    register: docker_registry_cert_stat
-    when: docker_registry_with_ssl|bool
-
-  - name: create server key and certificate
-    include: certificate.yml
-    when: docker_registry_with_ssl|bool and (not docker_registry_cert_stat.stat.exists)
-
-  - htpasswd: path=/etc/nginx/conf.d/registry.htpasswd name={{item.name}} password={{item.password}} owner=root group=root mode=0644
-    with_items: docker_registry_users
-    register: docker_registry_auth
-
-  - template: src=docker-registry-v2.j2 dest=/etc/nginx/conf.d/docker-registry.conf owner=root group=root mode=0644
-    register: docker_registry_vhost
-
-  - name: check if selinux is enabled
-    command: getenforce
-    register: selinux_status
-    ignore_errors: yes
-    changed_when: false
-
-  - name: to fix SELinux issue
-    shell: setsebool -P httpd_can_network_connect 1
-    when: selinux_status.rc != 0
-
-  - name: ensure Docker nginx is running
-    docker:
-      image: nginx:latest
-      name: www-registry
-      hostname: "{{ docker_registry_host }}"
-      ports: "{{docker_registry_ip}}:{{docker_registry_port}}:443"
-      links:
-        - registry:registry
-      volumes:
-        - "/var/log/nginx/:/var/log/nginx:rw"
-        - "/etc/nginx/conf.d:/etc/nginx/conf.d:ro"
-        - "/etc/nginx/certs:/etc/nginx/certs:ro"
-      state: reloaded
-      restart_policy: always
-      privileged: yes
-    register: start_nginx

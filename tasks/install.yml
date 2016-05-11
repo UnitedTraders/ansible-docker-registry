@@ -1,0 +1,11 @@
+---
+- name: install docker for RedHat
+  yum: name=docker state=present
+  when: ansible_os_family == "RedHat"
+
+- name: install docker for Debian
+  apt: name=docker state=present
+  when: ansible_os_family == "Debian"
+
+- name: ensure docker service is running
+  service: name=docker state=started enabled=yes

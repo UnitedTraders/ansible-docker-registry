@@ -1,0 +1,8 @@
+---
+- name: copy certificate key
+  copy: content={{ ssl_certificate_key_content }} dest=/etc/nginx/certs/{{docker_registry_host}}.key
+  notify: reload nginx
+
+- name: copy certificate file
+  copy: src={{ ssl_certificate_cert }} dest=/etc/nginx/certs/{{docker_registry_host}}.crt
+  notify: reload nginx

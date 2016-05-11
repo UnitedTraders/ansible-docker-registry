@@ -1,0 +1,14 @@
+---
+- file: path=/etc/nginx/certs state=directory
+
+- name: copy external certificates if possible
+  include: external-certificates.yml
+  when: (not docker_registry_ssl_self_signed|bool)
+
+- name: stat docker-registry certificate file
+  stat: path=/etc/nginx/certs/{{docker_registry_host}}.crt
+  register: docker_registry_cert_stat
+
+- name: create server key and certificate
+  include: self-signed-certificate.yml
+  when: (not docker_registry_cert_stat.stat.exists) and docker_registry_ssl_self_signed|bool

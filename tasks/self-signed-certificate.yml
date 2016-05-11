@@ -1,4 +1,19 @@
 ---
+  - name: install required for Debian
+    apt:
+      name: "{{item}}"
+      state: latest
+    with_items:
+      - openssl
+    when: ansible_os_family == "Debian" and docker_registry_ssl_self_signed|bool
+
+  - name: install required for Redhat
+    yum:
+      name: "{{item}}"
+      state: latest
+    with_items:
+      - openssl
+    when: ansible_os_family == "RedHat" and docker_registry_ssl_self_signed|bool
 
   - local_action: file path=./ssl state=directory
     sudo: no
