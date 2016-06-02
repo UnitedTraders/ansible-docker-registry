@@ -61,7 +61,7 @@
     register: docker_registry_cert_stat
 
   - name: create server key and certificate
-    include: certificate.yml
+    include: self-signed-certificate.yml
     when: not docker_registry_cert_stat.stat.exists
     notify: restart nginx
 

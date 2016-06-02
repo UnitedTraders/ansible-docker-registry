@@ -53,7 +53,7 @@
     when: docker_registry_with_ssl|bool
 
   - name: create server key and certificate
-    include: certificate.yml
+    include: self-signed-certificate.yml
     when: docker_registry_with_ssl|bool and (not docker_registry_cert_stat.stat.exists)
     notify: restart nginx
 
