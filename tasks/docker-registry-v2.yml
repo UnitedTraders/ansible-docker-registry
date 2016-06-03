@@ -40,11 +40,10 @@
 
   - name: ensure Docker Registry is running
     docker:
-      image: "registry:2"
-#      memory_limit: 1024MB
+      image: "registry:{{ docker_registry_version }}"
       name: registry
       ports:
-        - "127.0.0.1:5000:5000"
+        - "127.0.0.1:{{ docker_registry_int_port }}:{{ docker_registry_ext_port }}"
       env:
         REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /registry
       volumes:
@@ -58,7 +57,7 @@
 
 #FIXME  - name: test Docker Registry
 #    uri:
-#      url: http://localhost:5000/v2/
+#      url: http://localhost:{{ docker_registry_ext_port }}/v2/
 #      status_code: 200
 #      return_content: yes
 #    register: test_docker_registry
@@ -66,5 +65,7 @@
 #    retries: 5
 #    delay: 2
 
-  - include: nginx.yml
+  - include: auth.yml
 
+  - include: nginx.yml
+    when: docker_nginx|bool

@@ -15,7 +15,7 @@ upstream docker-registry {
 # }
 
 server {
-  listen {{docker_registry_port}};
+  listen {{docker_nginx_int_port}};
   server_name {{docker_registry_host}};
 
 {% if docker_registry_with_ssl|bool %}

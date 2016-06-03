@@ -8,11 +8,15 @@ pip_version_docker_py: 1.1.0
 pip_extra_args: ""
 proxy_env: {}
 
+docker_nginx: yes
 docker_registry_host: "{{ansible_fqdn}}"
 docker_registry_ip: "{{hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address']}}"
 docker_registry_with_ssl: yes
 docker_registry_ssl_self_signed: yes
-docker_registry_port: 443
+docker_registry_int_port: 5000
+docker_registry_ext_port: 5000
+docker_registry_version: 2
+docker_nginx_int_port: 443
 
 ssl_certificate_cert: 'files/default.crt'
 ssl_certificate_key_content: 'TEST'
